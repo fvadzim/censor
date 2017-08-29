@@ -1,0 +1,8 @@
+*.whl
+*txt
+*.marisa
+*.vw
+*.pyc
+*.egg
+*.csv
+censor/
