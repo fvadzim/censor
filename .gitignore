@@ -6,3 +6,4 @@
 *.egg
 *.csv
 censor/
+.vowpal_wabbit
