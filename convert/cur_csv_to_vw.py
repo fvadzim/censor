@@ -55,6 +55,17 @@ def post_to_corpus_line(post):
     )
     return ' '.join(parts)
 
+def multiprocess(output_file):
+    p = multiprocessing.Pool(10)
+    result = p.map(post_to_corpus_line,kek)
+    output_file.write('\n'.join(result))
+
+def oneprocess(output_file):
+    for row in csv_reader:
+        output_file.write(
+                post_to_corpus_line(row) + '\n'
+                    )
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser( description = 'Convert CSV file to Vowpal Wabbit format.' )
     parser.add_argument( "input_file",  help = "path to csv input file" )
@@ -70,15 +81,5 @@ if __name__ == "__main__":
         csv_reader.__next__()
 
         output_file = open(args.output_file, 'w')
-        # p = multiprocessing.Pool(10)
-        # print(list(csv_reader)[:10])
-        # result = p.map(post_to_corpus_line,csv_reader[:1000])
-        # output_file.write('\n'.join(result))
-        i = 0
-        for row in csv_reader:
-            i += 1
-            if i == 1000:
-                break
-            output_file.write(
-                    post_to_corpus_line(row) + '\n'
-                        )
+        
+        multiprocess(output_file)
