@@ -7,12 +7,15 @@ import nltk
 import numpy as np
 import pymorphy2
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(os.path.abspath(os.getcwd()))
 import datetime
 import argparse
 import collections
 import multiprocessing
 import functools
 csv.field_size_limit(500 * 1024 * 1024)
+import codecs
+
 def construct_bow(words):
         return [
             (
@@ -27,7 +30,7 @@ def words_count(text):
     space_chars = u',?!-«»“”’*…/_.\\'
     for c in space_chars:
         text = text.replace(c, ' ')
-
+    morph = pymorphy2.MorphAnalyzer()
     tokens = nltk.tokenize.wordpunct_tokenize(text)
     tokens = nltk.word_tokenize(text)
     for token in tokens:
@@ -46,7 +49,8 @@ def post_to_corpus_line(raw,
                         ):
     parts = ( functools.reduce ( lambda x, y : x + y,
     [
-        ['|' + field ]
+        [raw['id']]+
+        ['|@' + field ]
         + construct_bow(words_count(raw[field]))
         for field in fields
     ]))
@@ -61,6 +65,7 @@ def get_vw_raws_from_scv_raws(dict_raws):
 def get_csv_raws(csv_reader):
     return [raw for raw in csv_reader]
 
+
 class kek():
     pass
 
@@ -71,7 +76,7 @@ if __name__ == "__main__":
     parser.add_argument( "output_file",
                         help = "path to output file" )
     args = parser.parse_args()
-    with open(args.input_file) as input_file:
+    with open(args.input_file, 'r') as input_file:
         headers = input_file.readline().strip().split('\t')
         print(headers)
         # f.seek(0,0)

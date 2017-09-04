@@ -1,7 +1,6 @@
 import json
 import csv
 import os
-import vowpalwabbit
 import mysql.connector
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -123,8 +122,8 @@ if __name__=='__main__':
     sql2csv(
         host="localhost",
         user="root",
-        password="ASSANGE",
-        database="pscraper",
+        password="root",
+        database="bel_sites",
         charset="utf8",
         table_name='publications',
-        out_file_path='lolkek.csv')
+        out_file_path='publications.csv')

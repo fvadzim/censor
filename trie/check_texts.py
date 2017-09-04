@@ -39,4 +39,4 @@ if __name__ == "__main__":
     reduce_vector([trie.load_trie('./trie/trie/gambling.marisa'),
                     trie.load_trie('./trie/trie/alco.marisa')])
 
-#
+
