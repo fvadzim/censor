@@ -59,7 +59,8 @@ def post_to_corpus_line(raw,
 
 def get_vw_raws_from_scv_raws(dict_raws):
     p = multiprocessing.Pool(10)
-    return p.map(post_to_corpus_line, dict_raws[:1000])
+    return p.map(post_to_corpus_line, dict_raws[150000:175000])
+
 
 
 def get_csv_raws(csv_reader):
