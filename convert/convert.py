@@ -3,72 +3,70 @@ import csv
 import os
 import mysql.connector
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+import psycopg2
+from interface import Interface
+print(os.path.realpath(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+print(sys.path)
 from  parse import *
 import datetime
 
-def get_defaults():
-    default_dict ={
-        'int(11) unsigned': int,
-        'datetime': datetime.datetime,
-        'varchar(128)': str,
-        'varchar(512)': str,
-        'varchar(1024)': str,
-        'varchar(4096)': str,
-        'int(11)': int,
-        'mediumtext': str
-    }
-    return default_dict
+class ISqlConvert(Interface):
+    def get_table_fields(connection, table_name):
+        pass
 
-def get_default_value(tipe):
-    return get_defaults[tipe]
+    def get_table_length(connection, table_name):
+        pass
 
-def fill_None_with_defaults(raw):
-    for key in raw:
-        if raw[key]==None:
-            pass
+    def get_table_raw(cursor, table_name, i):
+        pass
+
+    def select_text_by_id(connectotion, table, i, key):
+        pass
 
 
-def get_table_fields(connection, table_name):
-    cursor = connection.cursor(buffered=False, dictionary=True)
-    cursor.execute("describe %s" % (table_name,));
-    typenames=[]
-    fieldnames=[]
-    for field in cursor.fetchall():
-        fieldnames.append(field['Field'])
-        typenames.append(field['Type'])
-    print(typenames)
-    return {'fieldnames' : fieldnames, 'typenames': typenames}
+class MysqlConverter(ISqlConvert):
 
-def get_table_length(connection, table_name):
-    cursor = connection.cursor(buffered=False, dictionary=True)
-    cursor.execute("SELECT COUNT(*) from %s" % (table_name,));
-    return int(cursor.fetchone()['COUNT(*)'])
+    def get_table_fields(connection, table_name):
+        cursor = connection.cursor(buffered=False, dictionary=True)
+        cursor.execute("describe %s" % (table_name,));
+        typenames=[]
+        fieldnames=[]
+        for field in cursor.fetchall():
+            fieldnames.append(field['Field'])
+            typenames.append(field['Type'])
+        print(typenames)
+        return {'fieldnames' : fieldnames, 'typenames': typenames}
 
-def get_table_raw(cursor, table_name, i):
-    cursor.execute('SELECT * FROM %s where id= %d' % (table_name, i))
-    try:
-        fetched = cursor.fetchall()
-        fetched  = fetched[0]
-        return fetched
-    except:
-        print (i)
-        print (fetched)
+    def get_table_length(connection, table_name):
+        cursor = connection.cursor(buffered=False, dictionary=True)
+        cursor.execute("SELECT COUNT(*) from %s" % (table_name,));
+        return int(cursor.fetchone()['COUNT(*)'])
 
+    def get_table_raw(cursor, table_name, i):
+        cursor.execute('SELECT * FROM %s where id= %d' % (table_name, i))
+        try:
+            fetched = cursor.fetchall()
+            fetched  = fetched[0]
+            return fetched
+        except:
+            print (i)
+            print (fetched)
 
-def select_text_by_id(connectotion, table, i, key):
-    print(i, os.getpid())
-    try:
-        cursor = connectotion.cursor(buffered=False, dictionary=True)
-        cursor.execute('SELECT * FROM %s where id= %d'% (table, i))
-        fetched = cursor.fetchall()
-        fetched  = fetched[0]
-        return fetched
-    except:
-        print(i)
-        print (fetched)
-        return ''
+    def select_text_by_id(connection, table, i, key):
+        print(i, os.getpid())
+        try:
+            cursor = connection.cursor(buffered=False, dictionary=True)
+            cursor.execute('SELECT * FROM %s where id= %d'% (table, i))
+            fetched = cursor.fetchall()
+            fetched  = fetched[0]
+            return fetched
+        except:
+            print(i)
+            print (fetched)
+            return ''
 
+def json_to_csv():
     in_file = open(file_path, 'r')
     if not out_file_path:
         out_file_path = os.path.join(

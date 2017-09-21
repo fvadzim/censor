@@ -26,7 +26,6 @@ def construct_bow(words):
 
 def words_count(text):
     words = collections.Counter()
-
     space_chars = u',?!-«»“”’*…/_.\\'
     for c in space_chars:
         text = text.replace(c, ' ')
@@ -47,19 +46,32 @@ def post_to_corpus_line(raw,
                             'title',
                             'category_text']
                         ):
-    parts = ( functools.reduce ( lambda x, y : x + y,
-    [
-        [raw['id']]+
-        ['|@' + field ]
-        + construct_bow(words_count(raw[field]))
+    print("  PARTS  ")
+    print(raw)
+    print([raw['id']]+[
+        ('|@' + field
+        + construct_bow(words_count(raw[field])))
         for field in fields
-    ]))
+    ])
+
+
+    parts = ( functools.reduce ( lambda x, y : x + y,
+
+    [raw['id']]+[
+        ('|@' + field
+        + construct_bow(words_count(raw[field])))
+        for field in fields
+    ]
+    ))
+    print (parts)
+
+    print(parts)
     return ' '.join(parts)+'\n'
 
 
 def get_vw_raws_from_scv_raws(dict_raws):
     p = multiprocessing.Pool(10)
-    return p.map(post_to_corpus_line, dict_raws[150000:175000])
+    return p.map(post_to_corpus_line, dict_raws[0:25000])
 
 
 
@@ -87,5 +99,5 @@ if __name__ == "__main__":
         dict_raws = get_csv_raws(csv_reader)
         print(len(dict_raws))
         open(args.output_file,'w').writelines(
-            get_vw_raws_from_scv_raws(list(dict_raws))
+            get_vw_raws_from_scv_raws(list(dict_raws[:100000]))
         )
