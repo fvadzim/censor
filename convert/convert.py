@@ -8,15 +8,20 @@ import psycopg2.extras
 from interface import implements, Interface
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from  parse import *
-import datetime
+from bs4 import BeautifulSoup
+
 
 class ISqlRawGetter(Interface):
 
     def get_table_raw(self, table_name, i, cursor=None):
         pass
 
-    def get_cursor(self, **kwargs):
+    def get_dict_cursor(self, **kwargs):
         pass
+
+    def get_default_cursor(self, **kwargs):
+        pass
+
 
 class SqlConnection():
     def __init__(
@@ -30,21 +35,40 @@ class SqlConnection():
         return [desc[0] for desc in self.cursor.description]
 
     def get_table_length(self, table_name):
-        cursor = self.connection.cursor(buffered = True)
+        cursor = self.get_default_cursor()
         cursor.execute("SELECT COUNT(*) from %s" % (table_name,));
         return cursor.fetchone()[0]
 
     def get_table_raw(self, table_name, i, cursor = None):
         if cursor is None:
-            cursor = self.get_cursor()
+            cursor = self.get_dict_cursor()
         cursor.execute('SELECT * FROM %s where id= %d' % (table_name, i))
         try:
-            fetched = cursor.fetchall()
-            fetched = fetched[0]
-            return fetched
-        except:
+            fetched = cursor.fetchone()
             print (i)
-            print (fetched)
+            #fetched = fetched[0]
+            return  {key: BeautifulSoup(('', str(fetched[key]))[bool(fetched[key])==True], "html5lib").get_text().replace(u'\xa0', u' ') for key in fetched.keys()}
+            '''a = {}
+            for key in fetched.keys():
+                print(key, fetched[key])
+                # a[key] = BeautifulSoup((fetched[key], '')[fetched[key] is None], "html5lib").get_text()
+                if fetched[key]:
+                    a[key] = BeautifulSoup(str(fetched[key]), "html5lib").get_text()
+                else:
+                    a[key]='''
+
+        except:
+            '''print("type of fetched : "  ,type(fetched))
+            print ("key type : ", type(key))
+            print("where eerror occured : ", key , ' : ' ,fetched[key])
+            print("BeautifulSouped : ", BeautifulSoup(('', fetched[key])[bool(fetched[key])], "html5lib").get_text())
+            # print (e)
+            #print (fetched)
+            # sys.exit()'''
+            print('error')
+
+    def get_default_cursor(self):
+        return self.connection.cursor()
 
     def select_field_by_id(self, table_name, i, key):
         try:
@@ -66,14 +90,11 @@ class _MySqlConnection(SqlConnection, implements(ISqlRawGetter)):
             database=database)
         self.cursor = self.connection.cursor(buffered=True, dictionary=True)
 
-    def get_cursor(self, **kwargs):
-        print("kwargs : ", kwargs)
-        if (len(kwargs) == 0):
-            return self.connection.cursor(
+    def get_dict_cursor(self):
+        return self.connection.cursor(
                 dictionary=True,
                 buffered=False)
-        else:
-            return self.connection.cursor(**kwargs)
+
 
 class PostgresSqlConnecton(SqlConnection, implements(ISqlRawGetter)):
     def __init__(self, host, user, password, database):
@@ -89,13 +110,9 @@ class PostgresSqlConnecton(SqlConnection, implements(ISqlRawGetter)):
         self.cursor = self.connection.cursor(
             cursor_factory=psycopg2.extras.RealDictCursor)
 
-    def get_cursor(self, **kwargs):
-        print("kwargs : ", kwargs)
-        if (len(kwargs) == 0):
-            return self.connection.cursor(
+    def get_dict_cursor(self):
+        return self.connection.cursor(
                 cursor_factory=psycopg2.extras.RealDictCursor)
-        else:
-            return self.connection.cursor(**kwargs)
 
 
 '''def json2csv():
@@ -120,7 +137,7 @@ class PostgresSqlConnecton(SqlConnection, implements(ISqlRawGetter)):
 def sql2csv(
     host, user, password,
     database, table_name, out_file_path):
-        sql_converter  = _MySqlConnection(
+        sql_converter  = PostgresSqlConnecton(
             host=host,
             user=user,
             password=password,
@@ -130,22 +147,13 @@ def sql2csv(
                 open(out_file_path, 'w'),
                  fieldnames =  sql_converter.get_table_fields(table_name),
                 delimiter='\t')
-        '''cursor = sql_converter.get_cursor(
-            buffered=False,
-            dictionary=True)'''
         csv_writer.writeheader()
         for i in range(1, sql_converter.get_table_length(table_name)):
             raw = sql_converter.get_table_raw(table_name, i)
             if raw:
-                # print (i)
-                csv_writer.writerow(raw)
 
-def get_new_cursor(self, **kwargs):
-    print("kwargs : ", kwargs)
-    if not len(kwargs):
-        return self.cursor(dictionary=True, buffered=False)
-    else:
-        return self.cursor(**kwargs)
+                #print("raw : ", raw)
+                csv_writer.writerow(raw)
 
 if __name__=='__main__':
     #json_to_csv('./data/tonality/test.json')
@@ -157,10 +165,10 @@ if __name__=='__main__':
         charset="utf8")'''
     sql2csv(
         host="localhost",
-        user="root",
+        user="citizen4",
         password="ASSANGE",
-        database="pscraper",
-        table_name="publications",
+        database="kyky",
+        table_name="contents",
         out_file_path='contents.csv')
     '''
     lol = mysql.connector.connect(
