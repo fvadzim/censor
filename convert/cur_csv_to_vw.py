@@ -33,50 +33,41 @@ def words_count(text):
     tokens = nltk.tokenize.wordpunct_tokenize(text)
     tokens = nltk.word_tokenize(text)
     for token in tokens:
-        if len(token) > 2:
+        if len(token) > 2 or token.isdigit():
             token = token.lower().replace(u'ё', u'е')
             word = morph.parse(token)[0].normal_form
-            if len(word) > 0:
+            if len(word):
                 words[word] += 1
     return words
 
-def post_to_corpus_line(raw,
+def post_to_corpus_line(row,
                         fields=[
                             'content',
                             'title',
-                            'category_text']
+                            'category_id']
                         ):
-    print("  PARTS  ")
-    print(raw)
-    print([raw['id']]+[
-        ('|@' + field
-        + construct_bow(words_count(raw[field])))
-        for field in fields
-    ])
+    # print('title', construct_bow(words_count(row['title'])))
+    # print('content', construct_bow(words_count(row['content'])))
+    parts = [row['id']]+[('|@'
+                        + field
+                        +('', ' ')[bool(len(construct_bow(words_count(row[field]))))]
+                        + ' '.join(construct_bow(words_count(row[field]))))
+        for field in fields]
 
 
-    parts = ( functools.reduce ( lambda x, y : x + y,
-
-    [raw['id']]+[
-        ('|@' + field
-        + construct_bow(words_count(raw[field])))
-        for field in fields
-    ]
-    ))
-    print (parts)
-
-    print(parts)
+# 
+    # print(parts)
     return ' '.join(parts)+'\n'
 
 
-def get_vw_raws_from_scv_raws(dict_raws):
+def get_vw_rows_from_scv_rows(dict_rows):
     p = multiprocessing.Pool(10)
-    return p.map(post_to_corpus_line, dict_raws[0:25000])
+    return p.map(post_to_corpus_line, dict_rows)
 
 
 
-def get_csv_raws(csv_reader):
-    return [raw for raw in csv_reader]
+def get_csv_rows(csv_reader):
+    return [row for row in csv_reader]
 
 
 class kek():
@@ -96,8 +87,8 @@ if __name__ == "__main__":
         csv_reader = csv.DictReader(input_file,
                                     fieldnames=headers,
                                     delimiter='\t')
-        dict_raws = get_csv_raws(csv_reader)
-        print(len(dict_raws))
+        dict_rows = get_csv_rows(csv_reader)
+        print(len(dict_rows))
         open(args.output_file,'w').writelines(
-            get_vw_raws_from_scv_raws(list(dict_raws[:100000]))
+            get_vw_rows_from_scv_rows(list(dict_rows))
         )
