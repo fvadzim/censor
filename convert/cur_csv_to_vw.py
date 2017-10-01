@@ -15,14 +15,17 @@ import multiprocessing
 import functools
 csv.field_size_limit(500 * 1024 * 1024)
 import codecs
+import goslate
+from translator import Translator
+def construct_bow(words, translate=''):
 
-def construct_bow(words):
-        return [
+            return [
             (
                 word.replace(' ', '_').replace(':', '_').replace('|', '_').replace('\t', '_') +
                 ('' if cnt == 1 else ':%g' % cnt)
             )
             for word, cnt in words.items()]
+
 
 def words_count(text):
     words = collections.Counter()
@@ -44,18 +47,19 @@ def post_to_corpus_line(row,
                         fields=[
                             'content',
                             'title',
-                            'category_id']
+                            'category_id'],
+                        translator=Translator('be','ru')
                         ):
     # print('title', construct_bow(words_count(row['title'])))
     # print('content', construct_bow(words_count(row['content'])))
     parts = [row['id']]+[('|@'
                         + field
                         +('', ' ')[bool(len(construct_bow(words_count(row[field]))))]
-                        + ' '.join(construct_bow(words_count(row[field]))))
+                        + ' '.join(construct_bow(words_count(translator.translate(row[field])))))
         for field in fields]
 
 
-# 
+#
     # print(parts)
     return ' '.join(parts)+'\n'
 
@@ -79,6 +83,8 @@ if __name__ == "__main__":
                         help = "path to csv input file" )
     parser.add_argument( "output_file",
                         help = "path to output file" )
+
+    # parser.add_argument()
     args = parser.parse_args()
     with open(args.input_file, 'r') as input_file:
         headers = input_file.readline().strip().split('\t')
