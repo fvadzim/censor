@@ -16,7 +16,7 @@ import functools
 csv.field_size_limit(500 * 1024 * 1024)
 import codecs
 import goslate
-from translator import Translator
+
 def construct_bow(words, translate=''):
 
             return [
@@ -26,8 +26,8 @@ def construct_bow(words, translate=''):
             )
             for word, cnt in words.items()]
 
-
 def words_count(text):
+    translator = Translator('be', 'ru')
     words = collections.Counter()
     space_chars = u',?!-«»“”’*…/_.\\'
     for c in space_chars:
@@ -38,7 +38,8 @@ def words_count(text):
     for token in tokens:
         if len(token) > 2 or token.isdigit():
             token = token.lower().replace(u'ё', u'е')
-            word = morph.parse(token)[0].normal_form
+            word = morph.parse(
+                translator.translate(token))[0].normal_form
             if len(word):
                 words[word] += 1
     return words
@@ -47,15 +48,14 @@ def post_to_corpus_line(row,
                         fields=[
                             'content',
                             'title',
-                            'category_id'],
-                        translator=Translator('be','ru')
+                            'category_id']
                         ):
     # print('title', construct_bow(words_count(row['title'])))
     # print('content', construct_bow(words_count(row['content'])))
     parts = [row['id']]+[('|@'
                         + field
                         +('', ' ')[bool(len(construct_bow(words_count(row[field]))))]
-                        + ' '.join(construct_bow(words_count(translator.translate(row[field])))))
+                        + ' '.join(construct_bow(words_count(row[field]))))
         for field in fields]
 
 
@@ -83,8 +83,6 @@ if __name__ == "__main__":
                         help = "path to csv input file" )
     parser.add_argument( "output_file",
                         help = "path to output file" )
-
-    # parser.add_argument()
     args = parser.parse_args()
     with open(args.input_file, 'r') as input_file:
         headers = input_file.readline().strip().split('\t')
