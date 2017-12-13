@@ -1,3 +1,4 @@
+import functools
 
 from pymystem3 import Mystem
 
@@ -10,18 +11,30 @@ class Filter():
         # else:
         #    self.trie = trie.marisa_trie([])
 
+    filtered_parts = {
+        "PART", "APRO", "PR" 
+        "SPRO", "ANUM", "ADVPRO", "CONJ"} 
+    
+
+    
     def get_word_from_token(self, token):
         print(token)
 
         if not "analysis" in token:  # to be changed!
             return None
+        
         if not token["analysis"]:  # to be changed!
             return None
+
+        if "сравн" in token:
+            return None
+
+            
 
         if not "gr" in token["analysis"][0]:  # to be changed!
             return None
 
-        if token["analysis"][0]["gr"] in filtered_parts:
+        if token["analysis"][0]["gr"].startswith(filtered_parts):
             return None
 
         if 'фам,жен' in token["analysis"][0]["gr"]:
@@ -45,6 +58,3 @@ class Filter():
         return [lex for lex in
                 [self.get_word_from_token(word) for word in self.stemmer_.analyze(text)] if None != lex]
 
-    filtered_parts = {
-        "ONJ=", "PART=", "APRO=", "SPRO=",
-        "SPRO=", "ANUM=", "ADVPRO="}
