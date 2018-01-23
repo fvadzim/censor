@@ -45,7 +45,8 @@ class SqlConnection():
         cursor.execute('SELECT * FROM %s where id= %d' % (table_name, i))
         try:
             fetched = cursor.fetchone()
-            print (i)
+            if i % 10000 ==0:
+               print (i)
             #fetched = fetched[0]
             return  {key: BeautifulSoup(('', str(fetched[key]))[bool(fetched[key])==True], "html5lib").get_text().replace(u'\xa0', u' ') for key in fetched.keys()}
             '''a = {}
@@ -137,12 +138,12 @@ class PostgresSqlConnecton(SqlConnection, implements(ISqlRawGetter)):
 def sql2csv(
     host, user, password,
     database, table_name, out_file_path):
-        sql_converter  = PostgresSqlConnecton(
+        sql_converter  = _MySqlConnection(
             host=host,
             user=user,
             password=password,
             database=database)
-        print("TABLE NAME :",table_name, "len", len(table_name))
+        #print("TABLE NAME :",table_name, "len", len(table_name))
         csv_writer = csv.DictWriter(
                 open(out_file_path, 'w'),
                  fieldnames =  sql_converter.get_table_fields(table_name),
@@ -165,11 +166,11 @@ if __name__=='__main__':
         charset="utf8")'''
     sql2csv(
         host="localhost",
-        user="citizen4",
-        password="ASSANGE",
-        database="kyky",
-        table_name="contents",
-        out_file_path='contents.csv')
+        user="root",
+        password="root",
+        database="bel_sites",
+        table_name="publications",
+        out_file_path='publications.csv')
     '''
     lol = mysql.connector.connect(
         host="localhost",

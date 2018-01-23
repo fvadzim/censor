@@ -34,7 +34,7 @@ def create_trie(dictionary_path,
     if file exists returns trie
     raises OSError else
 '''
-def load_trie (trie_path):
+def load_trie(trie_path):
     if not( os.path.exists(os.path.abspath(trie_path))
             or os.path.exists(os.path.join(os.getcwd(), trie_path))):
         print("##################################")
