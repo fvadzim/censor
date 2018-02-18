@@ -1,8 +1,10 @@
 import argparse
+
+
 def get_arguments_dict():
     parser = argparse.ArgumentParser()
     parser.add_argument("db_name",
-                        help = "name of database with texts")
+                        help="name of database with texts")
 
     parser.add_argument("-h", "--host",
                         dest="host",
@@ -14,7 +16,7 @@ def get_arguments_dict():
 
     parser.add_argument("-p", "--password",
                         dest="password",
-                        help= "mysql user's password")
+                        help="mysql user's password")
 
     parser.add_argument("-db", "--database",
                         dest="database",
@@ -24,20 +26,20 @@ def get_arguments_dict():
                         dest="user",
                         help="mysql user's name")
 
-    parser.add_argument("-c","--coding",
+    parser.add_argument("-c", "--coding",
                         dest="charset",
                         help="coding tom use",
                         required=False,
                         default="utf8")
 
+    args = {}
     try:
         args = parser.parse_args()
     except argparse.ArgumentError:
-        # here will be logs
         print("argparse.ArgumentError:")
         exit()
+    return args
 
-    return parser
 
-if __name__=="__main__":
-    print(lol(**{'kek':"shmek"}))
+if __name__ == "__main__":
+    pass

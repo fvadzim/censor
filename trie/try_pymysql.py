@@ -14,10 +14,3 @@ print(cursor.fetchall())
 
 cursor.execute('select * from publications where id = 10001')
 print(cursor.fetchall()[0]['content'])
-
-
-
-
-#for row in cursor.fetchmany(1000):
-#    print(row)
-#rows = cursor.fetchall()

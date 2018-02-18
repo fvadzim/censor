@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 import marisa_trie
-import nltk
 from nltk.stem.snowball import SnowballStemmer
 from nltk import word_tokenize
 import numpy as np
@@ -16,6 +15,8 @@ import pymorphy2
         ...
         zzz
 '''
+
+
 def create_trie(dictionary_path,
                 to_be_saved=True,
                 save_as=None):
@@ -29,13 +30,17 @@ def create_trie(dictionary_path,
             save_as = os.path.split(dictionary_path)[-1].split('.')[0]+'.marisa'
         trie.save(save_as)
     return trie
+
+
 '''
     load trie of ".marisa" format.
     if file exists returns trie
     raises OSError else
 '''
+
+
 def load_trie(trie_path):
-    if not( os.path.exists(os.path.abspath(trie_path))
+    if not (os.path.exists(os.path.abspath(trie_path))
             or os.path.exists(os.path.join(os.getcwd(), trie_path))):
         print("##################################")
         print(os.path.abspath(trie_path))
@@ -47,6 +52,8 @@ def load_trie(trie_path):
     trie = marisa_trie.Trie()
     trie.load(os.path.abspath(os.path.join(os.getcwd(), trie_path)))
     return trie
+
+
 '''
     Check text on occuruncies from trie in "*.marisa" format
     (marisa_trie librarian format).
@@ -54,35 +61,40 @@ def load_trie(trie_path):
     pymorphy.morph - stemmer from pymorphy(for russian lang)
 '''
 
+
 def get_trie_list(trie_pathes):
-    trie_list=[]
+    trie_list = []
     for trie_path in trie_pathes:
         trie_list.append(load_trie(trie_path))
     return trie_list
+
 
 def get_occurancies(text, trie):
 
     stemmer = SnowballStemmer('russian')
     morph = pymorphy2.MorphAnalyzer()
-    tokens = ([morph.parse(word)[0].normal_form for word in word_tokenize(text)]+
-              [stemmer.stem(word) for word in word_tokenize(text)])
+    tokens = ([morph.parse(word)[0].normal_form for word in word_tokenize(text)]
+              + [stemmer.stem(word) for word in word_tokenize(text)])
     ans = []
     for token in tokens:
         if token in trie:
             ans.append(token)
     return ans
+
+
 '''
     returns bool vector of was/was not a particluar lexicon in text
     trie_pathes: list of pathes to trie
 '''
+
+
 def get_vector(text, trie_list):
     v = np.zeros(len(trie_list))
     for index, trie in enumerate(trie_list):
         if len(get_occurancies(text,  trie)):
-            v[index]=1
+            v[index] = 1
     return v
 
 
 if __name__ == "__main__":
-    print (check_on_occurancies("ёбкая ябла милок",
-                                os.path.join(os.getcwd(),"trie/obscene_lexicon.marisa")))
+    pass
