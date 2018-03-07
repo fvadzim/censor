@@ -13,16 +13,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 class ISqlRawGetter(Interface):
 
     def get_table_raw(self, table_name, i, cursor=None):
-        pass
+        raise NotImplementedError
 
     def get_dict_cursor(self, **kwargs):
-        pass
+        raise NotImplementedError
 
     def get_default_cursor(self, **kwargs):
-        pass
+        raise NotImplementedError
 
 
-class SqlConnection():
+class SqlConnection:
     def __init__(
         self, host,
         user, password,
@@ -38,7 +38,7 @@ class SqlConnection():
         cursor.execute("SELECT COUNT(*) from %s" % (table_name,));
         return cursor.fetchone()[0]
 
-    def get_table_raw(self, table_name, i, cursor = None):
+    def get_table_raw(self, table_name, i, cursor=None):
         if cursor is None:
             cursor = self.get_dict_cursor()
         cursor.execute('SELECT * FROM %s where id= %d' % (table_name, i))
@@ -61,11 +61,12 @@ class SqlConnection():
         except:
             return ''
 
+
 class _MySqlConnection(SqlConnection, implements(ISqlRawGetter)):
     def __init__(self, host, user, password, database):
         super().__init__(
-            host = host, user = user,
-            password = password, database=database)
+            host=host, user=user,
+            passwor=password, database=database)
         self.connection = mysql.connector.connect(
             host=host,
             user=user,
@@ -121,14 +122,14 @@ def json2csv(file_path, out_file_path):
 def sql2csv(
         host, user, password,
         database, table_name, out_file_path):
-        sql_converter  = _MySqlConnection(
+        sql_converter = _MySqlConnection(
             host=host,
             user=user,
             password=password,
             database=database)
         csv_writer = csv.DictWriter(
             open(out_file_path, 'w'),
-            fieldnames =  sql_converter.get_table_fields(table_name),
+            fieldnames=sql_converter.get_table_fields(table_name),
             delimiter='\t')
         csv_writer.writeheader()
         for i in range(1, sql_converter.get_table_length(table_name)):

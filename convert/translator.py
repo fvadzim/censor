@@ -20,6 +20,6 @@ class Translator:
 
 if __name__ == "__main__":
     translator = Translator()
-    word = "Палёт над гняздом зязюліа"
+    word = "Палёт над гняздом зязюлi"
     print(translator.detect_lang(word))
     print(translator.translate(word))
