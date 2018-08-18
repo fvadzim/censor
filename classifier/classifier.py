@@ -19,6 +19,7 @@ class Classifier:
                                         fieldnames=headers,
                                         delimiter='\t')
             documents = get_csv_rows(csv_reader)
+            index = 0
             for document in documents:
                 if set(self.topics_dict[document["category_id"]]).intersection(
                     set(self.topic_distribution.get_most_similar_distribution(
@@ -26,5 +27,7 @@ class Classifier:
                     ))
                 ):
                     score += 1.
+                index += 1
+                print (score/index )
             return score / len(documents)
 
